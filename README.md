@@ -53,20 +53,26 @@ Pull the latest arXiv papers, match them against your Zotero library via embeddi
 ## Secrets & Env Vars
 Priority: env vars > `config.yaml` > `config.example.yaml`.
 
-Required:
-- `FEISHU_WEBHOOK` (or `LARK_WEBHOOK`; use `FEISHU_TEST_WEBHOOK` for dry-runs)
-- `ZOTERO_ID`
-- `ZOTERO_KEY`
-- `ZOTERO_LIBRARY_TYPE` (`user` or `group`)
-- `LLM_API_KEY`
-- `LLM_MODEL`
-- `LLM_BASE_URL` (use default for official OpenAI)
-
-Optional: `OPENAI_API_KEY` / `OPENAI_MODEL` / `OPENAI_BASE_URL` (aliases of `LLM_*`).
+| Name | Required | Source | Notes |
+| --- | --- | --- | --- |
+| `FEISHU_WEBHOOK` | Yes | Secret / env | `LARK_WEBHOOK` also works; use `FEISHU_TEST_WEBHOOK` for dry-runs. |
+| `ZOTERO_ID` | Yes | Secret / env | Zotero library ID. |
+| `ZOTERO_KEY` | Yes | Secret / env | Zotero API key. |
+| `ZOTERO_LIBRARY_TYPE` | Yes | Secret / env | `user` or `group`. |
+| `LLM_API_KEY` | Yes | Secret / env | OpenAI-compatible API key. |
+| `LLM_MODEL` | Yes | Secret / env | Model name. |
+| `LLM_BASE_URL` | Yes | Secret / env | Use default for official OpenAI. |
+| `OPENAI_API_KEY` | No | Secret / env | Alias of `LLM_API_KEY`. |
+| `OPENAI_MODEL` | No | Secret / env | Alias of `LLM_MODEL`. |
+| `OPENAI_BASE_URL` | No | Secret / env | Alias of `LLM_BASE_URL`. |
+| `TARGET_HOUR` | No | Actions variable | UTC hour for scheduled runs; default `0`. |
+| `TARGET_MIN` | No | Actions variable | UTC minute for scheduled runs; default `30`. |
 
 ## Config Highlights (`config.yaml`)
 - `feishu.webhook_url`, `feishu.title`, `feishu.header_template` (blue/wathet/turquoise/green/yellow/orange/red/carmine; `#DAE3FA` maps to wathet).
 - `arxiv.source` (`rss` or `api`), `arxiv.query`, `arxiv.max_results`, `arxiv.days_back` (supports fractional days for hours) for arXiv fetching/window.
+- Scheduling: GitHub Actions `on.schedule` cron controls when the run is queued; the job then sleeps until the target time (UTC) computed from `TARGET_HOUR`/`TARGET_MIN` on that run date.
+  - Set repository variables `TARGET_HOUR` and `TARGET_MIN` (Settings → Secrets and variables → Actions → Variables). Defaults are used if not set.
 - `zotero.library_id`, `zotero.api_key`, `zotero.library_type`, `zotero.item_types`, `zotero.max_items` for access/filters.
 - `embedding.model` (default `avsolatorio/GIST-small-Embedding-v0`).
 - `llm.model`, `llm.base_url`, `llm.api_key` for OpenAI-compatible calls.
@@ -81,12 +87,10 @@ Optional: `OPENAI_API_KEY` / `OPENAI_MODEL` / `OPENAI_BASE_URL` (aliases of `LLM
 
 ## GitHub Actions
 - Workflow `.github/workflows/run.yml`:  
-  - `run` job: two cron triggers to cover DST. To avoid early runs due to GH queueing, the job can queue early and sleep until target time.
-  - Default config in the workflow:
-    - cron `30 23 * * 0-4` + `QUEUE_EARLY_MINUTES=60` → target UTC 00:30 (EDT)
-    - cron `30 0 * * 1-5` + `QUEUE_EARLY_MINUTES=60` → target UTC 01:30 (EST)
-  - If you change the early window, update both the cron entries and `QUEUE_EARLY_MINUTES` together.
-    Both leave slack for GH scheduling; manual dispatch always available.  
+  - `run` job: scheduled queue + sleep until the target time.
+  - Examples:
+    - cron `30 23 * * 0-4` → queue early, wait until UTC 00:30 (set `TARGET_HOUR=0`, `TARGET_MIN=30`)
+    - cron `00 00 * * 1-5` → queue early, wait until UTC 01:30 (set `TARGET_HOUR=1`, `TARGET_MIN=30`)
   - `test` job: manual only, uses `FEISHU_TEST_WEBHOOK` for safe drills.
 - In your repo (or fork) Settings → Secrets, add the env vars above; the workflow copies `config.example.yaml` to `config.yaml` and runs `python main.py`.
 - Want zero local setup? Fork this repo → add Secrets in your fork → open Actions and manually trigger `run` or `test`. Tweak `config.example.yaml` / `arxiv.query` in your fork and rerun.
