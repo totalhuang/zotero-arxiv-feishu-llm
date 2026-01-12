@@ -74,7 +74,7 @@ def _result_to_dict(result: arxiv.Result) -> Dict:
     }
 
 
-def _extract_new_ids(arxiv_query: str, only_new: bool = True, days_back: Optional[int] = 1) -> List[str]:
+def _extract_new_ids(arxiv_query: str, only_new: bool = True, days_back: Optional[float] = 1) -> List[str]:
     feed = feedparser.parse(f"https://rss.arxiv.org/atom/{arxiv_query}")
     if "Feed error for query" in feed.feed.get("title", ""):
         raise ValueError(f"Invalid arXiv query: {arxiv_query}")
@@ -103,7 +103,7 @@ def fetch_daily_arxiv(
     max_results: int = 50,
     client: Optional[arxiv.Client] = None,
     only_new: bool = True,
-    days_back: Optional[int] = 1,
+    days_back: Optional[float] = 1,
     source: str = "rss",
 ) -> List[Dict]:
     """

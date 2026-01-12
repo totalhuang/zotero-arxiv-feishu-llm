@@ -120,7 +120,7 @@ def main():
         arxiv_query=config["arxiv"]["query"],
         max_results=int(config["arxiv"].get("max_results", 30)),
         only_new=bool(config["arxiv"].get("only_new", True)),
-        days_back=int(config["arxiv"].get("days_back", 1)),
+        days_back=float(config["arxiv"].get("days_back", 1)),
         source=str(config["arxiv"].get("source", "rss")).lower(),
     )
     print(f"Fetched {len(arxiv_papers)} arXiv candidates.")

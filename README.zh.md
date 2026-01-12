@@ -79,7 +79,7 @@
 ## 配置项速览（`config.yaml`）
 - `feishu.webhook_url`：飞书机器人 Webhook。
 - `feishu.title` / `feishu.header_template`：卡片标题与头部色（blue / wathet / turquoise / green / yellow / orange / red / carmine；填 `#DAE3FA` 会自动映射为 wathet）。
-- `arxiv.source`（`rss` 或 `api`）、`arxiv.query` / `arxiv.max_results` / `arxiv.days_back`：arXiv 拉取方式与时间窗口。
+- `arxiv.source`（`rss` 或 `api`）、`arxiv.query` / `arxiv.max_results` / `arxiv.days_back`（支持小数天数表示小时） ：arXiv 拉取方式与时间窗口。
 - `zotero.library_id` / `zotero.api_key` / `zotero.library_type` / `zotero.item_types` / `zotero.max_items`：Zotero 访问与过滤。
 - `embedding.model`：相似度嵌入模型（默认 `avsolatorio/GIST-small-Embedding-v0`）。
 - `llm.model` / `llm.base_url` / `llm.api_key`：OpenAI 兼容模型与接口。

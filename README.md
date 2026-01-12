@@ -66,7 +66,7 @@ Optional: `OPENAI_API_KEY` / `OPENAI_MODEL` / `OPENAI_BASE_URL` (aliases of `LLM
 
 ## Config Highlights (`config.yaml`)
 - `feishu.webhook_url`, `feishu.title`, `feishu.header_template` (blue/wathet/turquoise/green/yellow/orange/red/carmine; `#DAE3FA` maps to wathet).
-- `arxiv.source` (`rss` or `api`), `arxiv.query`, `arxiv.max_results`, `arxiv.days_back` for arXiv fetching/window.
+- `arxiv.source` (`rss` or `api`), `arxiv.query`, `arxiv.max_results`, `arxiv.days_back` (supports fractional days for hours) for arXiv fetching/window.
 - `zotero.library_id`, `zotero.api_key`, `zotero.library_type`, `zotero.item_types`, `zotero.max_items` for access/filters.
 - `embedding.model` (default `avsolatorio/GIST-small-Embedding-v0`).
 - `llm.model`, `llm.base_url`, `llm.api_key` for OpenAI-compatible calls.
