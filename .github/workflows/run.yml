@@ -62,10 +62,9 @@ jobs:
           target_epoch=$(date -u -d "$run_started_date $TARGET_HOUR:$TARGET_MIN:00" +%s)
           now_epoch=$(date -u +%s)
           sleep_seconds=$((target_epoch - now_epoch))
-          if [ "$sleep_seconds" -lt 0 ]; then
-            # If target time already passed today, roll to next day.
-            target_epoch=$((target_epoch + 86400))
-            sleep_seconds=$((target_epoch - now_epoch))
+          if [ "$sleep_seconds" -le 0 ]; then
+            echo "Target time already reached; continue."
+            exit 0
           fi
           echo "Sleeping ${sleep_seconds}s until $(date -u -d "@$target_epoch" +"%Y-%m-%dT%H:%M:%SZ")"
           sleep "$sleep_seconds"
