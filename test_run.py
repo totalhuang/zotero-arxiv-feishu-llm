@@ -26,6 +26,10 @@ def run(send: bool, limit: int = None):
         only_new=bool(cfg["arxiv"].get("only_new", True)),
         days_back=float(cfg["arxiv"].get("days_back", 1)),
         source=str(cfg["arxiv"].get("source", "rss")).lower(),
+        rss_wait_minutes=int(cfg["arxiv"].get("rss_wait_minutes", 30))
+        if cfg["arxiv"].get("rss_wait_minutes") is not None
+        else None,
+        rss_retry_minutes=int(cfg["arxiv"].get("rss_retry_minutes", 15)),
     )
 
     print("Loading Zotero papers...")
