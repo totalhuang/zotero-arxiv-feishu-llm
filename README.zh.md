@@ -64,15 +64,10 @@
 | `OPENAI_API_KEY` | 否 | Secrets / 环境变量 | `LLM_API_KEY` 别名。 |
 | `OPENAI_MODEL` | 否 | Secrets / 环境变量 | `LLM_MODEL` 别名。 |
 | `OPENAI_BASE_URL` | 否 | Secrets / 环境变量 | `LLM_BASE_URL` 别名。 |
-| `TARGET_HOUR` | 否 | Actions 变量 | 定时运行的 UTC 小时；默认0。 |
-| `TARGET_MIN` | 否 | Actions 变量 | 定时运行的 UTC 分钟；默认30。 |
 
 ## GitHub Actions
 工作流 `.github/workflows/run.yml`：
-- `run` Job：两条定时覆盖夏/冬令时。为避免 GH 排队导致过早执行，可提前排队并睡眠到目标时间。
-- 默认配置：
-  - cron `30 23 * * 0-4` → 提前触发排队，等待到UTC 0:30 即 EDT 08:30（夏令时），需要设置TARGET_HOUR=0，TARGET_MIN=30
-  - cron `00 00 * * 1-5` → 提前触发排队，等待到UTC 0:30 即 EST 09:30（冬令时），需要设置TARGET_HOUR=1，TARGET_MIN=30
+- `run` Job：仅定时触发。
 - `test` Job：仅手动触发，使用 `FEISHU_TEST_WEBHOOK`，便于演练不打扰正式群。
 
 - 在仓库 Settings → Secrets 添加上述环境变量后，即可点击 “Run workflow” 触发；工作流会自动复制 `config.example.yaml` 为 `config.yaml` 并执行 `python main.py`。
@@ -82,8 +77,8 @@
 - `feishu.webhook_url`：飞书机器人 Webhook。
 - `feishu.title` / `feishu.header_template`：卡片标题与头部色（blue / wathet / turquoise / green / yellow / orange / red / carmine；填 `#DAE3FA` 会自动映射为 wathet）。
 - `arxiv.source`（`rss` 或 `api`）、`arxiv.query` / `arxiv.max_results` / `arxiv.days_back`（支持小数天数表示小时） ：arXiv 拉取方式与时间窗口。
-- 定时规则：`on.schedule` 的 cron 只负责触发排队；任务会在启动后 sleep，直到当日 `TARGET_HOUR`/`TARGET_MIN`（UTC）为止。
-  - 在仓库变量中设置 `TARGET_HOUR` 和 `TARGET_MIN`（Settings → Secrets and variables → Actions → Variables）。未设置时使用默认值。
+- `arxiv.rss_wait_minutes` / `arxiv.rss_retry_minutes`：使用 RSS 时若暂无更新则轮询等待（例如日更未发布时）。
+- 定时规则：`on.schedule` 的 cron 只负责触发排队。
 - `zotero.library_id` / `zotero.api_key` / `zotero.library_type` / `zotero.item_types` / `zotero.max_items`：Zotero 访问与过滤。
 - `embedding.model`：相似度嵌入模型（默认 `avsolatorio/GIST-small-Embedding-v0`）。
 - `llm.model` / `llm.base_url` / `llm.api_key`：OpenAI 兼容模型与接口。

@@ -65,14 +65,12 @@ Priority: env vars > `config.yaml` > `config.example.yaml`.
 | `OPENAI_API_KEY` | No | Secret / env | Alias of `LLM_API_KEY`. |
 | `OPENAI_MODEL` | No | Secret / env | Alias of `LLM_MODEL`. |
 | `OPENAI_BASE_URL` | No | Secret / env | Alias of `LLM_BASE_URL`. |
-| `TARGET_HOUR` | No | Actions variable | UTC hour for scheduled runs; default `0`. |
-| `TARGET_MIN` | No | Actions variable | UTC minute for scheduled runs; default `30`. |
 
 ## Config Highlights (`config.yaml`)
 - `feishu.webhook_url`, `feishu.title`, `feishu.header_template` (blue/wathet/turquoise/green/yellow/orange/red/carmine; `#DAE3FA` maps to wathet).
 - `arxiv.source` (`rss` or `api`), `arxiv.query`, `arxiv.max_results`, `arxiv.days_back` (supports fractional days for hours) for arXiv fetching/window.
-- Scheduling: GitHub Actions `on.schedule` cron controls when the run is queued; the job then sleeps until the target time (UTC) computed from `TARGET_HOUR`/`TARGET_MIN` on that run date.
-  - Set repository variables `TARGET_HOUR` and `TARGET_MIN` (Settings → Secrets and variables → Actions → Variables). Defaults are used if not set.
+- `arxiv.rss_wait_minutes` / `arxiv.rss_retry_minutes`: when using RSS, keep polling for new papers if the feed is still empty (e.g. before daily update).
+- Scheduling: GitHub Actions `on.schedule` cron controls when the run is queued.
 - `zotero.library_id`, `zotero.api_key`, `zotero.library_type`, `zotero.item_types`, `zotero.max_items` for access/filters.
 - `embedding.model` (default `avsolatorio/GIST-small-Embedding-v0`).
 - `llm.model`, `llm.base_url`, `llm.api_key` for OpenAI-compatible calls.
@@ -87,10 +85,7 @@ Priority: env vars > `config.yaml` > `config.example.yaml`.
 
 ## GitHub Actions
 - Workflow `.github/workflows/run.yml`:  
-  - `run` job: scheduled queue + sleep until the target time.
-  - Examples:
-    - cron `30 23 * * 0-4` → queue early, wait until UTC 00:30 (set `TARGET_HOUR=0`, `TARGET_MIN=30`)
-    - cron `00 00 * * 1-5` → queue early, wait until UTC 01:30 (set `TARGET_HOUR=1`, `TARGET_MIN=30`)
+  - `run` job: scheduled only.
   - `test` job: manual only, uses `FEISHU_TEST_WEBHOOK` for safe drills.
 - In your repo (or fork) Settings → Secrets, add the env vars above; the workflow copies `config.example.yaml` to `config.yaml` and runs `python main.py`.
 - Want zero local setup? Fork this repo → add Secrets in your fork → open Actions and manually trigger `run` or `test`. Tweak `config.example.yaml` / `arxiv.query` in your fork and rerun.

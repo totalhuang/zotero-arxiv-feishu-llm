@@ -122,6 +122,10 @@ def main():
         only_new=bool(config["arxiv"].get("only_new", True)),
         days_back=float(config["arxiv"].get("days_back", 1)),
         source=str(config["arxiv"].get("source", "rss")).lower(),
+        rss_wait_minutes=int(config["arxiv"].get("rss_wait_minutes", 30))
+        if config["arxiv"].get("rss_wait_minutes") is not None
+        else None,
+        rss_retry_minutes=int(config["arxiv"].get("rss_retry_minutes", 15)),
     )
     print(f"Fetched {len(arxiv_papers)} arXiv candidates.")
     if not arxiv_papers:

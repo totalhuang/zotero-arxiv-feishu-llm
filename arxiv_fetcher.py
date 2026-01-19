@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
+import time
 
 import arxiv
 import feedparser
@@ -105,6 +106,8 @@ def fetch_daily_arxiv(
     only_new: bool = True,
     days_back: Optional[float] = 1,
     source: str = "rss",
+    rss_wait_minutes: Optional[int] = 30,
+    rss_retry_minutes: int = 15,
 ) -> List[Dict]:
     """
     Fetch arXiv papers for a given query string.
@@ -119,7 +122,24 @@ def fetch_daily_arxiv(
     results: List[Dict] = []
 
     if source == "rss":
-        ids = _extract_new_ids(arxiv_query, only_new=only_new, days_back=days_back)
+        if rss_retry_minutes <= 0:
+            rss_retry_minutes = 15
+        start_ts = time.monotonic()
+        ids: List[str] = []
+        while True:
+            ids = _extract_new_ids(arxiv_query, only_new=only_new, days_back=days_back)
+            if ids:
+                break
+            if not rss_wait_minutes or rss_wait_minutes <= 0:
+                break
+            elapsed = time.monotonic() - start_ts
+            remaining = rss_wait_minutes * 60 - elapsed
+            if remaining <= 0:
+                break
+            retry_seconds = rss_retry_minutes * 60
+            wait_for = min(retry_seconds, int(remaining))
+            print(f"RSS empty; retrying in {wait_for}s (remaining ~{int(remaining)}s)...")
+            time.sleep(wait_for)
         if not ids:
             return []
         if max_results > 0:
