@@ -54,6 +54,11 @@
 - 在企业微信群聊中添加「自定义机器人」（群机器人），复制生成的 Webhook URL（参考 [官方文档](https://developer.work.weixin.qq.com/document/path/91770)）。
 - 消息以 Markdown 格式通过 Webhook 发送；在 `config.yaml` 中配置 `wechat.webhook_url` / `wechat.title`。
 - **消息长度**：由于企业微信单条消息限制为 4096 字符，程序会自动将内容按 1000 字符分割成多条消息发送。
+- **@用户功能**：在 `config.yaml` 中配置 `wechat.mentioned_list`，支持：
+  - `["@all"]` - @所有人
+  - `["userid1", "userid2"]` - @指定用户（UserID可在企业微信管理后台的通讯录中查看）
+  - 也可通过环境变量 `WECHAT_MENTIONED_LIST` 设置（格式：逗号分隔，如 `"userid1,userid2"`）
+  - @用户标签会添加在第一条消息中
 - **优先级**：如果同时配置了飞书和企业微信，程序会优先使用企业微信。
 
 ## 密钥与环境变量

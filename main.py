@@ -43,6 +43,12 @@ def load_config(path: str = "config.yaml") -> Dict:
             if os.getenv(env_key):
                 cfg[section][key] = os.getenv(env_key)
                 break
+    
+    # 处理企业微信@用户列表（支持环境变量，格式：逗号分隔的UserID）
+    if os.getenv("WECHAT_MENTIONED_LIST"):
+        mentioned_str = os.getenv("WECHAT_MENTIONED_LIST")
+        cfg.setdefault("wechat", {})
+        cfg["wechat"]["mentioned_list"] = [uid.strip() for uid in mentioned_str.split(",") if uid.strip()]
 
     # Defaults
     cfg["feishu"].setdefault("title", "Zotero LLM Picks")
@@ -167,12 +173,19 @@ def main():
 
     # 根据配置选择发送到飞书或企业微信
     if config.get("wechat", {}).get("webhook_url"):
+        # 获取需要@的用户列表
+        mentioned_list = config.get("wechat", {}).get("mentioned_list", [])
+        if isinstance(mentioned_list, str):
+            # 如果配置的是字符串，转换为列表
+            mentioned_list = [mentioned_list]
+        
         # 发送到企业微信（每条论文一条消息）
         post_papers_separately(
             webhook_url=config["wechat"]["webhook_url"],
             title=config["wechat"].get("title", "每日论文推送"),
             papers=matches,
             delay_seconds=0.5,  # 每条消息间隔0.5秒，避免发送过快
+            mentioned_list=mentioned_list if mentioned_list else None,
         )
     elif config.get("feishu", {}).get("webhook_url"):
         # 发送到飞书

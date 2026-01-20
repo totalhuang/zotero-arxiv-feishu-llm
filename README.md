@@ -54,6 +54,11 @@ Pull the latest arXiv papers, match them against your Zotero library via embeddi
 - In your WeChat Work group chat, add a "Custom Bot" (群机器人) and copy the Webhook URL (see [official guide](https://developer.work.weixin.qq.com/document/path/91770)).
 - Messages are sent in Markdown format via Webhook; configure `wechat.webhook_url` / `wechat.title` in `config.yaml`.
 - **Message Length**: Due to WeChat Work's 4096 character limit, messages are automatically split into multiple messages of up to 1000 characters each.
+- **Mention Users**: Configure `wechat.mentioned_list` in `config.yaml` to @ users:
+  - `["@all"]` - mention everyone
+  - `["userid1", "userid2"]` - mention specific users (find UserID in WeChat Work admin panel → Contacts)
+  - Can also use environment variable `WECHAT_MENTIONED_LIST` (comma-separated, e.g., `"userid1,userid2"`)
+  - Mentions are added to the first message only
 - **Priority**: If both Feishu and WeChat Work webhooks are configured, WeChat Work takes priority.
 
 ## Secrets & Env Vars
@@ -75,7 +80,7 @@ Priority: env vars > `config.yaml` > `config.example.yaml`.
 
 ## Config Highlights (`config.yaml`)
 - `feishu.webhook_url`, `feishu.title`, `feishu.header_template` (blue/wathet/turquoise/green/yellow/orange/red/carmine; `#DAE3FA` maps to wathet).
-- `wechat.webhook_url`, `wechat.title` for WeChat Work bot configuration.
+- `wechat.webhook_url`, `wechat.title`, `wechat.mentioned_list` for WeChat Work bot configuration (e.g., `["@all"]` or `["userid1", "userid2"]`).
 - `arxiv.source` (`rss` or `api`), `arxiv.query`, `arxiv.max_results`, `arxiv.days_back` (supports fractional days for hours) for arXiv fetching/window.
 - `arxiv.rss_wait_minutes` / `arxiv.rss_retry_minutes`: when using RSS, keep polling for new papers if the feed is still empty (e.g. before daily update).
 - Scheduling: GitHub Actions `on.schedule` cron controls when the run is queued.

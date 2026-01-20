@@ -6,6 +6,7 @@ feishu:
 wechat:
   title: "每日论文推送"
   webhook_url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your-key"    # 企业微信机器人 webhook url
+  mentioned_list: []  # 可选：需要@的用户ID列表，例如: ["userid1", "userid2"] 或 ["@all"] 表示@所有人
 
 arxiv:
   query: "cs.AI+cs.RO+cs.LG+cs.CL+cs.CV"

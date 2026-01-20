@@ -185,8 +185,15 @@ def build_single_paper_message(
 def build_summary_message(
     title: str,
     total: int,
+    mentioned_list: List[str] = None,
 ) -> Dict:
-    """构建摘要消息（第一条消息）"""
+    """构建摘要消息（第一条消息）
+    
+    Args:
+        title: 消息标题
+        total: 论文总数
+        mentioned_list: 需要@的用户ID列表，支持 ["@all"] 或具体的UserID列表
+    """
     date_str = datetime.now().strftime('%Y年%m月%d日')
     
     markdown_content = (
@@ -196,6 +203,17 @@ def build_summary_message(
         f"📚 **找到论文:** {total} 篇\n\n"
         f"接下来将逐条推送每篇论文的详细信息..."
     )
+    
+    # 添加@用户标签（Markdown格式需要在内容中使用 <@userid> 语法）
+    if mentioned_list:
+        at_tags = []
+        for userid in mentioned_list:
+            if userid == "@all":
+                at_tags.append("@all")
+            else:
+                at_tags.append(f"<@{userid}>")
+        if at_tags:
+            markdown_content += "\n\n" + " ".join(at_tags)
     
     return {
         "msgtype": "markdown",
@@ -234,14 +252,16 @@ def post_papers_separately(
     title: str,
     papers: List[Dict[str, str]],
     delay_seconds: float = 0.5,
+    mentioned_list: List[str] = None,
 ) -> None:
-    """将论文按4000字符长度分成多条消息推送
+    """将论文按1000字符长度分成多条消息推送
     
     Args:
         webhook_url: 企业微信Webhook URL
         title: 消息标题
         papers: 论文列表
         delay_seconds: 每条消息之间的延迟（秒），避免发送过快
+        mentioned_list: 需要@的用户ID列表，支持 ["@all"] 或具体的UserID列表，只在第一条消息中@
     """
     import time
     
@@ -251,7 +271,7 @@ def post_papers_separately(
     
     if total == 0:
         # 如果没有论文，发送一条提示消息
-        payload = build_summary_message(title, 0)
+        payload = build_summary_message(title, 0, mentioned_list=mentioned_list)
         post_to_wechat(webhook_url, payload)
         print("Sent summary message (no papers) to WeChat Work webhook.")
         return
@@ -267,8 +287,21 @@ def post_papers_separately(
     current_message_parts = []
     current_length = 0
     
-    # 第一条消息的头部
-    header = f"# {title}\n\nฅʕ•̫͡•ʔฅ ◔.̮◔✧ (•̀ᴗ• ) ArXiv 小助手来啦！{date_str} 找到 **{total}** 📚 篇论文：\n\n---\n\n"
+    # 第一条消息的头部（包含@用户）
+    header = f"# {title}\n\nฅʕ•̫͡•ʔฅ ◔.̮◔✧ (•̀ᴗ• ) ArXiv 小助手来啦！{date_str} 找到 **{total}** 📚 篇论文：\n\n"
+    
+    # 在第一条消息中添加@用户标签
+    if mentioned_list:
+        at_tags = []
+        for userid in mentioned_list:
+            if userid == "@all":
+                at_tags.append("@all")
+            else:
+                at_tags.append(f"<@{userid}>")
+        if at_tags:
+            header += " ".join(at_tags) + "\n\n"
+    
+    header += "---\n\n"
     header_length = len(header)
     current_length = header_length
     current_message_parts = [header]
